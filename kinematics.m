@@ -1,7 +1,7 @@
 [k,j] = forKin()
 
-function [FK,J] = forKin() %(q1,q2,q3)
-    syms phi s k % not sure what these are yet, maybe inputs? 
+function [FK,J] = forKin(phi,s,k) %(q1,q2,q3)
+    %syms phi s k % not sure what these are yet, maybe inputs? 
     %This is the Transformation matrix (FK) and Jacobian matrix generation function
     % The inputs of this function are symbols that are going to be used in
     % the build of transformation matrix.
