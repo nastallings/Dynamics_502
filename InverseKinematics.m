@@ -1,4 +1,4 @@
-
+ 
 % sams IK method from a paper
 % example: P = 2,2,2 // segment length = 5 doesnt matter?
 [phi1, k1] = genIK(2,2,2)
