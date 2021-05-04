@@ -1,14 +1,25 @@
  
-% sams IK method from a paper
+% sams IK method from 
+% Closed-Form Inverse Kinematics for Continuum Manipulators Paper
+% Mainly Pages 2081 & 2082
+
+% NOTES:
+
+% "move to a given curvature k and direction of curvature phi"
+% "extend to trunk length s (s is constant for us)
+% r = radius of arc
+% k = 1 / r 
+
+
+
 % example: P = 2,2,2 // segment length = 5 doesnt matter?
-[phi1, k1] = genIK(2,2,2)
+[phi1, k1] = genValues(2,2,2)
 
 % INPUT:   x, y, z - units of length
-% Known:   s (known constant) =  arc length - units of length Q: SAME AS SEGMENT LENGTH?
-
+% Known:   s (known constant for us) =  arc length - units of length Q: SAME AS SEGMENT LENGTH?
 % OUTPUTS: phi = direction of curvature - units of radians
 %          k = the curvature - units of  1/length  
-function [phi,k] = genIK(x, y, z)
+function [phi,k] = genValues(x, y, z)
 % section 2.2 says how to handle singularities but sam is tired
 % P  = (x,y,z) % desired point
 
@@ -19,15 +30,33 @@ function [phi,k] = genIK(x, y, z)
  
  phi = atan2(y,x);
  
- % FIGURE OUT WHY WE CALC THETA
-%  % figure 3
-%  if zprime > 0:
-%      theta = arccos(1 -k*(sqrt(x^2-y^2)));
-%  else 
-%      theta = 2*pi - arccos(1 -k*(sqrt(x^2-y^2)));
-    
+ % i think z = zprime cuz we only rotate about z axis?
+ zprime = z;
+ % figure 3
+ if zprime > 0
+     theta = arccos(1 -k*(sqrt(x^2-y^2)));
+ else 
+     theta = 2*pi - arccos(1 -k*(sqrt(x^2-y^2)));  
+ end
+
 end
 
+% With the list of desired endpoints for each section
+%   1. subtract the translation due to the base section from
+%      the other desired endpoints
+%   2. Apply opposite rotation due to the base section
+%      to the remaining sections
+%      Rotation due to a single section 
+%      w = [ -sin(phi) cos(phi) 0]' by the angle theta
+%      Adjusted endpoint values = R(w,-theta)*(Pnext - Pcurrent)
+%      where Pcurrent is the endpoint of the section whose K, phi
+%      values are being computer, and Pnext is the endpoint of the
+%      remaining section.
+% 
+% We have no deadlength sections in this model
+function addSegs()
+end
+ 
 % Kehan's function that follows standard calculations
 function qi = InverseKin(pd,J,T03)
     % This function is a IK that used Jacobian method
