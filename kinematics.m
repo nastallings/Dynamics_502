@@ -1,7 +1,7 @@
 [k,j] = forKin()
 
-function [FK,J] = forKin() %(q1,q2,q3)
-    syms phi s k % not sure what these are yet, maybe inputs? 
+function [FK,J] = forKin(phi,s,k) %(q1,q2,q3)
+    %syms phi s k % not sure what these are yet, maybe inputs? 
     %This is the Transformation matrix (FK) and Jacobian matrix generation function
     % The inputs of this function are symbols that are going to be used in
     % the build of transformation matrix.
@@ -16,9 +16,11 @@ function [FK,J] = forKin() %(q1,q2,q3)
     %get position vector from T
     posV = [FK(1,4);FK(2,4);FK(3,4)];
     % Calculate the jacobian with the partial derivative
-    jointV = [phi,s, k]; % what joint variables get used for JV?
+    jointV = [phi];     % you can take the jacobian with respect to phi OR 
+                        % kappa, presumably to get a jacobian for a 
+                        % different kind of application. phi = k * s
     jv1 = jacobian(posV,jointV);
-        % bottom half jv2 = 
+        % bottom half jv2 = ?
     %jacobian
     J = jv1; % ,jv2]'; % q3;
 end
