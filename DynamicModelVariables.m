@@ -1,0 +1,1 @@
+[M,C,N] = DynamicalModel(0,0);
