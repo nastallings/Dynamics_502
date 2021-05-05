@@ -13,7 +13,6 @@ Qi = InverseKinematics(Des_pose,J,T);
 % Calculate the dynamical model
 [M,C,N] = DynamicalModel(T,J);
 %% The ode set point simulation of the model
-%% The ode set point simulation of the model
 %Set up the initial status [phia0, ka0, phia0_d, ka0_d, phib0, kb0, phib0_d, kb0_d, phic0, kc0, phic0_d, kc0_d]
 syms a0 a1 a2 a3
 Qi = [3,1,3,1,3,1];
