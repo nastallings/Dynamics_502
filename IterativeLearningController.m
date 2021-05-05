@@ -7,7 +7,7 @@ tf = 50;
 
 % x0 = [k_C, phi_C, k_B, phi_B, k_A, phi_A, k_C_dot, phi_C_dot, k_B_dot,
 % phi_B_dot, k_A_dot, phi_A_dot, U_A, U_B, U_C]
-x0 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+x0 = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
 xf = [4, 2, 3, 4, 2, 1];
 [T,X] = ode45(@(t,x) IterativeODE(t, x, xf, M, C, N), [0 tf], x0);
 
@@ -96,9 +96,13 @@ function [dx] = IterativeODE(t, x, xf, M, C, N)
     du= -1/beta * Kp*error+u;
 
     % Calculate Model 
-    M_r = subs(M, [k_C, phi_C, k_B, phi_B, k_A, phi_A], transpose(q));
-    C_r = subs(C, [k_C, phi_C, k_B, phi_B, k_A, phi_A, k_C_dot, phi_C_dot, k_B_dot, phi_B_dot, k_A_dot, phi_A_dot], [transpose(q), transpose(q_dot)]);
-    N_r = subs(N, [k_C, phi_C, k_B, phi_B, k_A, phi_A], transpose(q));
+    syms k_C k_B k_A l_C l_B l_A phi_C phi_B phi_A k_C_dot k_B_dot k_A_dot phi_C_dot phi_B_dot phi_A_dot
+    lengthC= 9.3;
+    lengthB= 12.4;
+    lengthA= 9.3;
+    M_r = subs(M, [k_C, phi_C, k_B, phi_B, k_A, phi_A, l_C, l_B, l_A], [transpose(q), lengthC, lengthB, lengthA]);
+    C_r = subs(C, [k_C, phi_C, k_B, phi_B, k_A, phi_A, k_C_dot, phi_C_dot, k_B_dot, phi_B_dot, k_A_dot, phi_A_dot, l_C, l_B, l_A], [transpose(q), transpose(q_dot), lengthC, lengthB, lengthA]);
+    N_r = subs(N, [k_C, phi_C, k_B, phi_B, k_A, phi_A, l_C, l_B, l_A], [transpose(q), lengthC, lengthB, lengthA]);
 
     dx_dot = inv(M_r)*(tau - C_r*q_dot - N_r);
     
