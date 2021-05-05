@@ -14,28 +14,28 @@ xf = [4, 2, 3, 4, 2, 1];
 figure,
 ax1 = subplot(3, 1, 1);
 plot(T,X(:,1), 'linewidth',2)
-ylabel("AH");
+ylabel("k_C");
 xlabel("Time");
-title('A_H vs Time')
+title('k_C vs Time')
 
 ax2 = subplot(3, 1, 2);
 plot(T,X(:,3), 'linewidth',2)
-ylabel("AV");
+ylabel("k_B");
 xlabel("Time");
-title('A_V vs Time')
+title('k_B vs Time')
 
 ax3 = subplot(3, 1, 3);
 plot(T,X(:,5), 'linewidth',2)
-ylabel("CH");
+ylabel("phi_C");
 xlabel("Time");
-title('C_H vs Time')
+title('phi_C vs Time')
 
 figure,
 ax4 = subplot(3, 1, 1);
 plot(T,X(:,2), 'linewidth',2)
-ylabel("AHdot");
+ylabel("phi_B");
 xlabel("Time");
-title('AH_d vs Time')
+title('phi_B vs Time')
 
 ax5 = subplot(3, 1, 2);
 plot(T,X(:,4), 'linewidth',2)
@@ -45,9 +45,9 @@ title('AV_d vs Time')
 
 ax6 = subplot(3, 1, 3);
 plot(T,X(:,6), 'linewidth',2)
-ylabel("CHdot");
+ylabel("phi_A");
 xlabel("Time");
-title('CH_d vs Time')
+title('phi_A vs Time')
 
 
 function [dx] = IterativeODE(t, x, xf, M, C, N)        
@@ -96,7 +96,11 @@ function [dx] = IterativeODE(t, x, xf, M, C, N)
     du= -1/beta * Kp*error+u;
 
     % Calculate Model 
-    dx_dot = inv(M)*(tau - C*q_dot - N)
+    M_r = subs(M, [k_C, phi_C, k_B, phi_B, k_A, phi_A], transpose(q));
+    C_r = subs(C, [k_C, phi_C, k_B, phi_B, k_A, phi_A, k_C_dot, phi_C_dot, k_B_dot, phi_B_dot, k_A_dot, phi_A_dot], [transpose(q), transpose(q_dot)]);
+    N_r = subs(N, [k_C, phi_C, k_B, phi_B, k_A, phi_A], transpose(q));
+
+    dx_dot = inv(M_r)*(tau - C_r*q_dot - N_r);
     
     %Use the computed torque and state space model to compute the increment in state vector.
     dx(1,1) = q_dot(1);
