@@ -42,9 +42,9 @@ aphic = double([s5.a0;s5.a1;s5.a2;s5.a3]);
 q6 = [0; 0; Qi(3); 0];
 s6 = solve(p*ap==q6,ap);
 akc = double([s6.a0;s6.a1;s6.a2;s6.a3]);
-%Running the ode functions
+%% Running the set point controll ode functions
 [T,X] = ode45(@(t,x) odesetpoint(t,x,aphia,aka,aphib,akb,aphic,akc),tf,x0_setpoint);
-%% Plotting the joint trajectory results
+% Plotting the joint trajectory results
 figure('Name','The trajectory of designed theta and actual theta');
 plot(T,X(:,1),'color','r');
 hold on
