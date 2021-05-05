@@ -1,9 +1,15 @@
+structure = load('M_N_C_variables');
+M = structure.M;
+C = structure.C;
+N = structure.N;
+
 tf = 50;
 
-% x0 = [Ahorizontal, Ahorizontal, Avertical, Avertical_dot, Chorizontal, Chorizontal_dot, uAh, uAv, uCh]
-x0 = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-xf = [2, 0, 4, 0, 2, 0, 0, 0, 0];
-[T,X] = ode45(@(t,x) IterativeODE(t, x, xf), [0 tf], x0);
+% x0 = [k_C, phi_C, k_B, phi_B, k_A, phi_A, k_C_dot, phi_C_dot, k_B_dot,
+% phi_B_dot, k_A_dot, phi_A_dot, U_A, U_B, U_C]
+x0 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+xf = [4, 2, 3, 4, 2, 1];
+[T,X] = ode45(@(t,x) IterativeODE(t, x, xf, M, C, N), [0 tf], x0);
 
 figure,
 ax1 = subplot(3, 1, 1);
@@ -44,44 +50,68 @@ xlabel("Time");
 title('CH_d vs Time')
 
 
-function [dx] = IterativeODE(t, x, xf)        
-    % Ahorizontal 
-    AH_e = x(1)-xf(1);
-    Kp_AH = 6;
-    Kd_AH = 5;
-    Ah_beta = 0.25;
-    AHtau = 1/Ah_beta *(-Kp_AH*AH_e)-Kd_AH*x(2)+x(7);    
-    duAH= -1/Ah_beta * Kp_AH*AH_e+x(7);
-    
-    % Avertical 
-    AV_e = x(3)-xf(3);
-    Kp_AV = 10;
-    Kd_AV = 9;
-    Av_beta = 0.25;
-    AVtau = 1/Av_beta *(-Kp_AV * AV_e) -Kd_AV*x(4)+x(8);    
-    duAV= -1/Av_beta * Kp_AV * AV_e+x(8);  
-    
-    % Chorizontal 
-    CH_e = x(5)-xf(5);
-    Kp_CH = 16;
-    Kd_CH = 2;
-    Ch_beta = 0.25;
-    CHtau = 1/Ch_beta *(-Kp_CH*CH_e) -Kd_CH*x(6)+x(9);    
-    duCH= -1/Ch_beta * (Kp_CH*CH_e) +x(9);  
-    
+function [dx] = IterativeODE(t, x, xf, M, C, N)        
+%     % C
+%     q_C = [x(1);x(2)];
+%     q_C_dot = [x(7);x(8)];
+%     u_C = x(13);
+%     error_C = q_C - xf;
+%     Kp_C = 6;
+%     Kd_C = 5;
+%     C_beta = 0.25;
+%     Ctau = 1/C_beta *(-Kp_C*error_C)-Kd_C*q_C_dot+u_C;    
+%     duC= -1/C_beta * Kp_C*error_C+u_C;
+%     
+%     % B 
+%     q_B = [x(3);x(4)];
+%     q_B_dot = [x(9);x(10)];
+%     u_B = x(14);
+%     error_B = q_B - xf;
+%     Kp_B = 6;
+%     Kd_B = 5;
+%     B_beta = 0.25;
+%     Btau = 1/B_beta *(-Kp_B*error_B)-Kd_B*q_B_dot+u_B;    
+%     duB= -1/B_beta * Kp_B*error_B+u_B; 
+%     
+%     % A 
+%     q_A = [x(5);x(6)];
+%     q_A_dot = [x(11);x(12)];
+%     u_A = x(15);
+%     error_A = q_A - xf;
+%     Kp_A = 6;
+%     Kd_A = 5;
+%     A_beta = 0.25;
+%     Atau = 1/A_beta *(-Kp_A*error_A)-Kd_A*q_A_dot+u_A;    
+%     duA= -1/A_beta * Kp_A*error_A+u_A; 
+ 
+
+    q = [x(1);x(2);x(3);x(4);x(5);x(6)];
+    q_dot = [x(7);x(8);x(9);x(10);x(11);x(12)];
+    u = x(13);
+    error = q - xf;
+    Kp = 6;
+    Kd = 5;
+    beta = 0.25;
+    tau = 1/beta *(-Kp*error)-Kd*q_dot+u;    
+    du= -1/beta * Kp*error+u;
+
     % Calculate Model 
-    dx_dot = [AHtau;
-              AVtau;
-              CHtau;];
+    dx_dot = inv(M)*(tau - C*q_dot - N)
     
     %Use the computed torque and state space model to compute the increment in state vector.
-    dx(1,1) = x(2);
-    dx(2,1) = dx_dot(1);
-    dx(3,1) = x(4);
-    dx(4,1) = dx_dot(2);
-    dx(5,1) = x(6);
-    dx(6,1) = dx_dot(3);
-    dx(7,1) = duAH;
-    dx(8,1) = duAV;
-    dx(9,1) = duCH;
+    dx(1,1) = q_dot(1);
+    dx(2,1) = q_dot(2);
+    dx(3,1) = q_dot(3);
+    dx(4,1) = q_dot(4);
+    dx(5,1) = q_dot(5);
+    dx(6,1) = q_dot(6);
+    dx(7,1) = dx_dot(1);
+    dx(8,1) = dx_dot(2);
+    dx(9,1) = dx_dot(3);
+    dx(10,1) = dx_dot(4);
+    dx(11,1) = dx_dot(5);
+    dx(12,1) = dx_dot(6);
+    dx(13,1) = du;
+    dx(14,1) = du;
+    dx(15,1) = du;
 end
