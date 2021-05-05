@@ -8,7 +8,7 @@ tf = 50;
 % x0 = [k_C, phi_C, k_B, phi_B, k_A, phi_A, k_C_dot, phi_C_dot, k_B_dot,
 % phi_B_dot, k_A_dot, phi_A_dot, U_A, U_B, U_C]
 x0 = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-xf = [4, 2, 3, 4, 2, 1];
+xf = [4; 2; 3; 4; 2; 1];
 [T,X] = ode45(@(t,x) IterativeODE(t, x, xf, M, C, N), [0 tf], x0);
 
 figure,
@@ -92,7 +92,7 @@ function [dx] = IterativeODE(t, x, xf, M, C, N)
     Kp = 6;
     Kd = 5;
     beta = 0.25;
-    tau = 1/beta *(-Kp*error)-Kd*q_dot+u;    
+    tau = 1/beta *(-Kp*error)-Kd*q_dot+u;
     du= -1/beta * Kp*error+u;
 
     % Calculate Model 
