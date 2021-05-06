@@ -31,15 +31,15 @@ function [phi,k] = genValues(x, y, z)
  kden = x^2+y^2+z^2;
  k = knum/kden;
  
- phi = atan2(y,x);
+ theta = atan2(y,x);
  
  % i think z = zprime cuz we only rotate about z axis?
  zprime = z;
  % figure 3
  if zprime > 0
-     theta = acos(1 -k*(sqrt(x^2-y^2)));
+     phi = acos(1 -k*(sqrt(x^2-y^2))); % theta in paper
  else 
-     theta = 2*pi - acos(1 -k*(sqrt(x^2-y^2)));  
+     phi = 2*pi - acos(1 -k*(sqrt(x^2-y^2)));  % theta in paper
  end
 
 end
