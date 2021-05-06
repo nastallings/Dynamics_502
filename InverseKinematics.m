@@ -14,6 +14,9 @@
 
 % example: P = 2,2,2 // segment length = 5 doesnt matter?
 [phi1, k1] = genValues(2,2,2)
+[phi2, k2] = genValues(3,4,1)
+
+pNext = addSegs(2, 2, 2, 3, 4, 1)
 
 % INPUT:   x, y, z - units of length
 % Known:   s (known constant for us) =  arc length - units of length Q: SAME AS SEGMENT LENGTH?
@@ -34,9 +37,9 @@ function [phi,k] = genValues(x, y, z)
  zprime = z;
  % figure 3
  if zprime > 0
-     theta = arccos(1 -k*(sqrt(x^2-y^2)));
+     theta = acos(1 -k*(sqrt(x^2-y^2)));
  else 
-     theta = 2*pi - arccos(1 -k*(sqrt(x^2-y^2)));  
+     theta = 2*pi - acos(1 -k*(sqrt(x^2-y^2)));  
  end
 
 end
@@ -54,7 +57,19 @@ end
 %      remaining section.
 % 
 % We have no deadlength sections in this model
-function addSegs()
+
+% INPUT the two sets of x y z points, c = current, n = next
+% outputs actual pn once the points are shifted by
+
+function pNext = addSegs(cX, cY, cZ, nX, nY, nZ)
+pc = [cX, cY, cZ];
+pn = [nX, nY, nZ];
+
+pNext = pn - pc;
+% apply rotation somehow
+
+%axis in which the segment rotates around
+     % w = [ -sin(phi) cos(phi) 0]'; %plug in -theta
 end
  
 % Kehan's function that follows standard calculations
