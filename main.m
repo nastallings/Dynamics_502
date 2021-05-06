@@ -15,6 +15,7 @@ Qi = InverseKinematics(Des_pose,J,T);
 % [M,C,N] = DynamicalModel(T,J);
 %% The ode set point simulation of the model
 %Set up the initial status [phia0, ka0, phia0_d, ka0_d, phib0, kb0, phib0_d, kb0_d, phic0, kc0, phic0_d, kc0_d]
+% Qi = IK3D(Des_x,Des_y,Des_z);
 Qi = [3,1,2];
 x0_setpoint = [0;0;0;0;0;0];
 tf = 0:0.01:20;
