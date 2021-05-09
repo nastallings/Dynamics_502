@@ -1,1 +1,4 @@
-[M,C,N] = DynamicalModel(0,0);
+[M,C,N] = DynamicalModel();
+M
+N
+C

@@ -1,166 +1,149 @@
-function [M,C,N] = DynamicalModel(T,J)
+function [M,C,N] = DynamicalModel()
     %	This function should take whatever it needs to build a dynamical model for the robot 
     
     %   I'm not sure about the input, but I think it definately needs to take T&J
     %   to calculate the M,C,N matrixes
-    
-    
-    syms k_C k_B k_A l_C l_B l_A phi_C phi_B phi_A k_C_dot k_B_dot k_A_dot phi_C_dot phi_B_dot phi_A_dot g k_C_ddot phi_C_ddot k_B_ddot phi_B_ddot k_A_ddot phi_A_ddot
-
-    %C
-    T01 = [cos(phi_C)*cos(k_C * l_C), -sin(phi_C), -cos(phi_C)*sin(k_B*l_B), -(1/k_C)*cos(phi_C)+(1/k_C)*cos(phi_C)*cos(k_C*l_C);
-                 sin(phi_C)*cos(k_C*l_C),  cos(phi_C), -sin(phi_C)*sin(k_C*l_C), -(1/k_C)*sin(phi_C)+(1/k_C)*sin(phi_C)*cos(k_C*l_C);
-                 sin(k_C*l_C), 0, cos(k_C*l_C), (1/k_C)*sin(k_C*l_C);
-                 0, 0, 0, 1];
-    %B
-    T12 = [cos(phi_B)*cos(k_B * l_B), -sin(phi_B), -cos(phi_B)*sin(k_B*l_B), -(1/k_B)*cos(phi_B)+(1/k_B)*cos(phi_B)*cos(k_B*l_B);
-                 sin(phi_B)*cos(k_B*l_B),  cos(phi_B), -sin(phi_B)*sin(k_B*l_B), -(1/k_B)*sin(phi_B)+(1/k_B)*sin(phi_B)*cos(k_B*l_B);
-                 sin(k_B*l_B), 0, cos(k_B*l_B), (1/k_B)*sin(k_B*l_B);
-                 0, 0, 0, 1];
-    
-    %A         
-    T23 = [cos(phi_A)*cos(k_A * l_A), -sin(phi_A), -cos(phi_A)*sin(k_A*l_A), -(1/k_A)*cos(phi_A)+(1/k_A)*cos(phi_A)*cos(k_A*l_A);
-                 sin(phi_A)*cos(k_B*l_A),  cos(phi_A), -sin(phi_A)*sin(k_B*l_A), -(1/k_A)*sin(phi_A)+(1/k_A)*sin(phi_A)*cos(k_A*l_A);
-                 sin(k_A*l_A), 0, cos(k_A*l_A), (1/k_A)*sin(k_A*l_A);
-                 0, 0, 0, 1];           
-    %T02         
-    T02 = T12*T01;
-    %T03
-    T03 = T23*T12*T01;
-    
-    %Provided by Elephant Trunk Paper and confirmed
-    vel_C = expand(chainRule(T01(1:3,4),[k_C, phi_C],[k_C_dot, phi_C_dot],[k_C_ddot, phi_C_ddot]));
-      
-    %Calculated     
-    vel_B = expand(chainRule(T02(1:3,4),[k_B, phi_B],[k_B_dot, phi_B_dot],[k_B_ddot, phi_B_ddot]));
-    vel_A = expand(chainRule(T03(1:3,4),[k_A, phi_A],[k_A_dot, phi_A_dot],[k_A_ddot, phi_A_ddot]));
-
-    %Mass
-    mC = 120;
-    mB = 180;
-    mA = 120;
-         
-    %K Term
-    K1 = 1/2*mC*vel_C.' * vel_C;
-    K2 = 1/2*mB*vel_B.' * vel_B;
-    K3 = 1/2*mA*vel_A.' * vel_A;        
-    Kin_energy = K1+K2+K3;
-    
-    %P Term 
-    P1 = mC*g*T01(3,4);
-    P2 = mB*g*T02(3,4);
-    P3 = mA*g*T03(3,4); 
-    Pot_energy = P1+P2+P3;
-    
-    L = simplify(Kin_energy - Pot_energy);
-    
-    x1 = diff(L, k_C_dot);
-    x2 = diff(L, phi_C_dot);
-    x3 = diff(L, k_B_dot);
-    x4 = diff(L, phi_B_dot);
-    x5 = diff(L, k_A_dot);
-    x6 = diff(L, phi_A_dot);
-    
-    y1 = chainRule(x1, [k_C, phi_C, k_B, phi_B, k_A, phi_A],[k_C_dot, phi_C_dot, k_B_dot, phi_B_dot, k_A_dot, phi_A_dot],[k_C_ddot, phi_C_ddot,k_B_ddot, phi_B_ddot,k_A_ddot, phi_A_ddot]);
-    y2 = chainRule(x2, [k_C, phi_C, k_B, phi_B, k_A, phi_A],[k_C_dot, phi_C_dot, k_B_dot, phi_B_dot, k_A_dot, phi_A_dot],[k_C_ddot, phi_C_ddot,k_B_ddot, phi_B_ddot,k_A_ddot, phi_A_ddot]);
-    y3 = chainRule(x3, [k_C, phi_C, k_B, phi_B, k_A, phi_A],[k_C_dot, phi_C_dot, k_B_dot, phi_B_dot, k_A_dot, phi_A_dot],[k_C_ddot, phi_C_ddot,k_B_ddot, phi_B_ddot,k_A_ddot, phi_A_ddot]);
-    y4 = chainRule(x4, [k_C, phi_C, k_B, phi_B, k_A, phi_A],[k_C_dot, phi_C_dot, k_B_dot, phi_B_dot, k_A_dot, phi_A_dot],[k_C_ddot, phi_C_ddot,k_B_ddot, phi_B_ddot,k_A_ddot, phi_A_ddot]);
-    y5 = chainRule(x5, [k_C, phi_C, k_B, phi_B, k_A, phi_A],[k_C_dot, phi_C_dot, k_B_dot, phi_B_dot, k_A_dot, phi_A_dot],[k_C_ddot, phi_C_ddot,k_B_ddot, phi_B_ddot,k_A_ddot, phi_A_ddot]);
-    y6 = chainRule(x6, [k_C, phi_C, k_B, phi_B, k_A, phi_A],[k_C_dot, phi_C_dot, k_B_dot, phi_B_dot, k_A_dot, phi_A_dot],[k_C_ddot, phi_C_ddot,k_B_ddot, phi_B_ddot,k_A_ddot, phi_A_ddot]);
-    
-    z1 = diff(L, k_C);
-    z2 = diff(L, phi_C);
-    z3 = diff(L, k_B);
-    z4 = diff(L, phi_B);
-    z5 = diff(L, k_A);
-    z6 = diff(L, phi_A);
-     
-    Tau_1 = y1 - z1;
-    Tau_2 = y2 - z2;
-    Tau_3 = y3 - z3;
-    Tau_4 = y4 - z4;
-    Tau_5 = y5 - z5;
-    Tau_6 = y6 - z6;
-    
-    Tau = [Tau_1; Tau_2; Tau_3; Tau_4; Tau_5; Tau_6];
-      
-    %% Calculate M
-    M11 = simplify(Tau_1 - subs(Tau_1,k_C_ddot,0)) /k_C_ddot;
-    M12 = simplify(Tau_1 - subs(Tau_1,phi_C_ddot,0)) /phi_C_ddot;
-    M13 = simplify(Tau_1 - subs(Tau_1,k_B_ddot,0)) /k_B_ddot;
-    M14 = simplify(Tau_1 - subs(Tau_1,phi_B_ddot,0)) /phi_B_ddot;
-    M15 = simplify(Tau_1 - subs(Tau_1,k_A_ddot,0)) /k_A_ddot;
-    M16 = simplify(Tau_1 - subs(Tau_1,phi_A_ddot,0)) /phi_A_ddot;
-    
-    M21 = simplify(Tau_2 - subs(Tau_2,k_C_ddot,0)) /k_C_ddot;
-    M22 = simplify(Tau_2 - subs(Tau_2,phi_C_ddot,0)) /phi_C_ddot;
-    M23 = simplify(Tau_2 - subs(Tau_2,k_B_ddot,0)) /k_B_ddot;
-    M24 = simplify(Tau_2 - subs(Tau_2,phi_B_ddot,0)) /phi_B_ddot;
-    M25 = simplify(Tau_2 - subs(Tau_2,k_A_ddot,0)) /k_A_ddot;
-    M26 = simplify(Tau_2 - subs(Tau_2,phi_A_ddot,0)) /phi_A_ddot;
+    syms q_dot_1 q_dot_2 q_dot_3 real   
+    syms q_ddot_1 q_ddot_2 q_ddot_3 real
+    syms I1 I2 I3 real
+    syms m1 m2 m3
+    syms l1 l2 l3
+    syms q1 q2 q3 real
+    syms lc1 lc2 lc3 g
+    screw_axes = [[0;0;1;0;0;0], [0;-1;0;l1;0;0], [0;-1;0;l1;0;-l2]];
+    thetalist = [q1; q2; q3];
  
-    M31 = simplify(Tau_3 - subs(Tau_3,k_C_ddot,0)) /k_C_ddot;
-    M32 = simplify(Tau_3 - subs(Tau_3,phi_C_ddot,0)) /phi_C_ddot;
-    M33 = simplify(Tau_3 - subs(Tau_3,k_B_ddot,0)) /k_B_ddot;
-    M34 = simplify(Tau_3 - subs(Tau_3,phi_B_ddot,0)) /phi_B_ddot;
-    M35 = simplify(Tau_3 - subs(Tau_3,k_A_ddot,0)) /k_A_ddot;
-    M36 = simplify(Tau_3 - subs(Tau_3,phi_A_ddot,0)) /phi_A_ddot;
+    % space
+    I = eye(3);
+    joint_transformations = cell(length(thetalist),1);
+    for joint = 1 : length(thetalist)
+        w = skew(screw_axes(1:3,joint));
+        v = screw_axes(4:6,joint);
+        theta = thetalist(joint);
+        rotation = I + sin(theta)* w + (1-cos(theta))*w^2;
+        translation = (I * theta+(1-cos(theta))*w+(theta-sin(theta))*w^2)*v;
+        joint_transformations{joint} = [rotation translation; 0 0 0 1];
+    end
+    M01 = [1 0 0 0;
+           0 0 -1 0;
+           0 1 0 l1;
+           0 0 0 1];
+    T01 = joint_transformations{1}*M01;
+       
+    M02 = [1 0 0 l2;
+            0 0 -1 0;
+            0 1 0 l1;
+            0 0 0 1];
+    T02 = simplify(joint_transformations{1}*joint_transformations{2}*M02);
     
-    M41 = simplify(Tau_4 - subs(Tau_4,k_C_ddot,0)) /k_C_ddot;
-    M42 = simplify(Tau_4 - subs(Tau_4,phi_C_ddot,0)) /phi_C_ddot;
-    M43 = simplify(Tau_4 - subs(Tau_4,k_B_ddot,0)) /k_B_ddot;
-    M44 = simplify(Tau_4 - subs(Tau_4,phi_B_ddot,0)) /phi_B_ddot;
-    M45 = simplify(Tau_4 - subs(Tau_4,k_A_ddot,0)) /k_A_ddot;
-    M46 = simplify(Tau_4 - subs(Tau_4,phi_A_ddot,0)) /phi_A_ddot; 
-    
-    M51 = simplify(Tau_5 - subs(Tau_5,k_C_ddot,0)) /k_C_ddot;
-    M52 = simplify(Tau_5 - subs(Tau_5,phi_C_ddot,0)) /phi_C_ddot;
-    M53 = simplify(Tau_5 - subs(Tau_5,k_B_ddot,0)) /k_B_ddot;
-    M54 = simplify(Tau_5 - subs(Tau_5,phi_B_ddot,0)) /phi_B_ddot;
-    M55 = simplify(Tau_5 - subs(Tau_5,k_A_ddot,0)) /k_A_ddot;
-    M56 = simplify(Tau_5 - subs(Tau_5,phi_A_ddot,0)) /phi_A_ddot; 
-    
-    M61 = simplify(Tau_6 - subs(Tau_6,k_C_ddot,0)) /k_C_ddot;
-    M62 = simplify(Tau_6 - subs(Tau_6,phi_C_ddot,0)) /phi_C_ddot;
-    M63 = simplify(Tau_6 - subs(Tau_6,k_B_ddot,0)) /k_B_ddot;
-    M64 = simplify(Tau_6 - subs(Tau_6,phi_B_ddot,0)) /phi_B_ddot;
-    M65 = simplify(Tau_6 - subs(Tau_6,k_A_ddot,0)) /k_A_ddot;
-    M66 = simplify(Tau_6 - subs(Tau_6,phi_A_ddot,0)) /phi_A_ddot; 
-    
-    M = [[M11, M12, M13, M14, M15, M16]; [M21, M22, M23, M24, M25, M26]; [M31, M32, M33, M34, M35, M36]; [M41, M42, M43, M44, M45, M46]; [M51, M52, M53, M54, M55, M56]; [M61, M62, M63, M64, M65, M66]];
-    M = simplify(M);
-    
-    %% Calculate N
-    N1 = subs(Tau_1, [k_C_dot, phi_C_dot, k_B_dot, phi_B_dot, k_A_dot, phi_A_dot, k_C_ddot, phi_C_ddot,k_B_ddot, phi_B_ddot,k_A_ddot, phi_A_ddot], [0,0,0,0,0,0,0,0,0,0,0,0]);
-    N2 = subs(Tau_2, [k_C_dot, phi_C_dot, k_B_dot, phi_B_dot, k_A_dot, phi_A_dot, k_C_ddot, phi_C_ddot,k_B_ddot, phi_B_ddot,k_A_ddot, phi_A_ddot], [0,0,0,0,0,0,0,0,0,0,0,0]);
-    N3 = subs(Tau_3, [k_C_dot, phi_C_dot, k_B_dot, phi_B_dot, k_A_dot, phi_A_dot, k_C_ddot, phi_C_ddot,k_B_ddot, phi_B_ddot,k_A_ddot, phi_A_ddot], [0,0,0,0,0,0,0,0,0,0,0,0]);
-    N4 = subs(Tau_4, [k_C_dot, phi_C_dot, k_B_dot, phi_B_dot, k_A_dot, phi_A_dot, k_C_ddot, phi_C_ddot,k_B_ddot, phi_B_ddot,k_A_ddot, phi_A_ddot], [0,0,0,0,0,0,0,0,0,0,0,0]);
-    N5 = subs(Tau_5, [k_C_dot, phi_C_dot, k_B_dot, phi_B_dot, k_A_dot, phi_A_dot, k_C_ddot, phi_C_ddot,k_B_ddot, phi_B_ddot,k_A_ddot, phi_A_ddot], [0,0,0,0,0,0,0,0,0,0,0,0]);
-    N6 = subs(Tau_6, [k_C_dot, phi_C_dot, k_B_dot, phi_B_dot, k_A_dot, phi_A_dot, k_C_ddot, phi_C_ddot,k_B_ddot, phi_B_ddot,k_A_ddot, phi_A_ddot], [0,0,0,0,0,0,0,0,0,0,0,0]);
+    M03 = [1 0 0 l2+l3;
+            0 0 -1 0;
+             0 1 0 l1;
+            0 0 0 1];
+    T03 = simplify(joint_transformations{1}*joint_transformations{2}*joint_transformations{3}*M03);
 
-    N = [N1;N2;N3;N4;N5;N6];
-    N = simplify(N);
+   
+    M0_c1 = [1 0 0 0;
+            0 1 0 0;
+            0 0 1 lc1;
+            0 0 0 1];
+    T0_c1 = simplify(joint_transformations{1}*M0_c1);  
     
-    %% Calculate C
-    C1 = Tau_1 - (M(1,:) * [k_C_ddot, phi_C_ddot,k_B_ddot, phi_B_ddot,k_A_ddot, phi_A_ddot].' + N1);
-    C2 = Tau_2 - (M(2,:) * [k_C_ddot, phi_C_ddot,k_B_ddot, phi_B_ddot,k_A_ddot, phi_A_ddot].' + N2);
-    C3 = Tau_3 - (M(3,:) * [k_C_ddot, phi_C_ddot,k_B_ddot, phi_B_ddot,k_A_ddot, phi_A_ddot].' + N3);
-    C4 = Tau_4 - (M(4,:) * [k_C_ddot, phi_C_ddot,k_B_ddot, phi_B_ddot,k_A_ddot, phi_A_ddot].' + N4);
-    C5 = Tau_5 - (M(5,:) * [k_C_ddot, phi_C_ddot,k_B_ddot, phi_B_ddot,k_A_ddot, phi_A_ddot].' + N5);
-    C6 = Tau_6 - (M(6,:) * [k_C_ddot, phi_C_ddot,k_B_ddot, phi_B_ddot,k_A_ddot, phi_A_ddot].' + N6);
+    M0_c2 = [1 0 0 lc2;
+            0 0 -1 0;
+            0 1 0 l1;
+            0 0 0 1];
+    T0_c2 = simplify(joint_transformations{1}*joint_transformations{2}*M0_c2);
     
-    C = [C1;C2;C3;C4;C5;C6];
-    C = simplify(C);
     
+    M0_c3 = [1 0 0 l2+lc3;
+            0 0 -1 0;
+            0 1 0 l1;
+            0 0 0 1];
+    T0_c3 = simplify(joint_transformations{1}*joint_transformations{2}*joint_transformations{3}*M0_c3);    
+    
+    
+    Oc1 = T0_c1(1:3,4);
+    Jv_c1 = jacobian(Oc1, [q1 q2 q3]);
+
+    z0 = [0;0;1];
+    zero = zeros([3,1]);
+    Jw_c1 = [z0 zero zero];
+
+
+    Oc2 = T0_c2(1:3,4);
+    Jv_c2 = jacobian(Oc2, [q1 q2 q3]);
+
+    z1 = T01(1:3,3);
+    Jw_c2 = [z0 z1 zero];
+
+    Oc3 = T0_c3(1:3,4);
+    Jv_c3 = jacobian(Oc3, [q1 q2 q3]);
+
+    z2 = T02(1:3,3);
+    Jw_c3 = [z0 z1 z2];
+
+
+%% Calculate M
+
+Mv = m1*Jv_c1.'*Jv_c1 + m2*Jv_c2.'*Jv_c2 + m3*Jv_c3.'*Jv_c3;
+
+
+Rc1 = T0_c1(1:3,1:3);
+Rc2 = T0_c2(1:3,1:3);
+Rc3 = T0_c3(1:3,1:3);
+
+Mw = Jw_c1.'*Rc1*I1*Rc1.'*Jw_c1 + Jw_c2.'*Rc2*I2*Rc2.'*Jw_c2 + Jw_c3.'*Rc3*I3*Rc3.'*Jw_c3;
+
+
+M = simplify(Mv+Mw);
+
+
+
+K = simplify((1/2)*[q_dot_1 q_dot_2 q_dot_3]*M*[q_dot_1; q_dot_2; q_dot_3]);
+
+dDdq = zeros(3,3,3)*sym(1);
+dDdq(:,:,1) = simplify(diff(M, q1));
+dDdq(:,:,2) = simplify(diff(M, q2));
+dDdq(:,:,3) = simplify(diff(M, q3));
+
+
+
+%% Calculate C
+    Cs = zeros(3,3,3)*sym(1);
+    for joint = 1:3
+        for j = 1:3
+            for k = 1:3
+                Cs(joint,j,k) = simplify(0.5*(dDdq(k,j,joint) + dDdq(k,joint,j) - dDdq(joint,j,k)));
+            end
+        end
+    end
+
+
+    C = zeros(2,2)*sym(1);
+    dq = [q_dot_1, q_dot_2, q_dot_3];
+    for k = 1:3
+        for j = 1:3
+            C(k,j) = simplify(squeeze(dq*Cs(:,j,k)));
+        end
+    end
+
+%% Calculate N
+% Calculate Potential Energy 
+    Pc1 = m1 * g * T0_c1(3,4);
+    Pc2 = m2 * g * T0_c2(3,4);
+    Pc3 = m3 * g * T0_c3(3,4);
+    P = Pc1 + Pc2 + Pc3;
+
+    n1 = diff(P,q1);
+    n2 = diff(P,q2);
+    n3 = diff(P,q3);
+    N = [n1; n2; n3];
+
+%% Dynamical Model 
+    Lagrange_Tau = simplify(expand(M*[q_ddot_1; q_ddot_2; q_ddot_3]+ C*[q_dot_1; q_dot_2; q_dot_3] + N));
 end
 
-
-function answer = chainRule(func,q,qd,qdd)
-    for i = 1:length(func)
-        for j = 1:length(q)                
-            partials(:,j) = diff(func(i),q(j)) * qd(j) + diff(func(i),qd(j)) * qdd(j);
-        end             
-        temp(:,i) = simplify(partials);
-    end       
-    answer = sum(temp).';
+function X = skew(x)
+    X=[0 -x(3) x(2) ; x(3) 0 -x(1) ; -x(2) x(1) 0 ];
 end
