@@ -6,7 +6,7 @@ close all
 % Des_pose = input("Please input the desired position:\n");
 %% The ode set point simulation of the model
 
-%Assume Qi = [3,1,2];
+%Assume Qi = [3,1,2] = [phi,k,theta];
 T = forKin(3,1,2);
 Des_x = T(1,4);
 Des_y = T(2,4);
