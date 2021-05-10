@@ -1,10 +1,22 @@
 clc
 clear all
 close all
+%% Get the desired position from user input
+% Des_pose = zeros(3,1);
+% Des_pose = input("Please input the desired position:\n");
 %% The ode set point simulation of the model
+
+%Assume Qi = [3,1,2];
+T = forKin(3,1,2);
+Des_x = T(1,4);
+Des_y = T(2,4);
+Des_z = T(3,4);
+Qi = zeros(1,3);
+
+% Check wether the inverse kinematics feedbacks the correct results
+[Qi(1),Qi(2),Qi(3)] = IK3D(Des_x,Des_y,Des_z);
+
 %Set up the initial status [phia0, ka0, phia0_d, ka0_d, phib0, kb0, phib0_d, kb0_d, phic0, kc0, phic0_d, kc0_d]
-% Qi = IK3D(Des_x,Des_y,Des_z);
-Qi = [3,1,2];
 x0_setpoint = [0;0;0;0;0;0];
 tf = 0:0.01:20;
 % Qe = [phiaf,kaf,phibf,kbf,phicf,kcf]
