@@ -1,50 +1,8 @@
-tf = 100;
-
-% x0 = [theta, theta_dot, phi, phi_dot]
-x0 = [pi/12, 0, pi/3, 0];
-xf = [2; pi/2;0];
-[T,X] = ode45(@(t,x) IterativeODE(t, x, xf), [0 tf], x0);
-figure,
-ax1 = subplot(2, 2, 1);
-plot(T,X(:,1), 'linewidth',2)
-ylabel("theta");
-xlabel("Time");
-title('theta vs Time')
-hold on
-yline(xf(1), 'r--', 'LineWidth', 1);
-
-ax2 = subplot(2, 2, 2);
-plot(T,X(:,3), 'linewidth',2)
-ylabel("phi");
-xlabel("Time");
-title('phi vs Time')
-hold on
-yline(xf(2), 'r--', 'LineWidth', 1);
-
-
-ax3 = subplot(2, 2, 3);
-plot(T,X(:,2), 'linewidth',2)
-ylabel("theta dot");
-xlabel("Time");
-title('theta dot vs Time')
-hold on
-yline(0, 'r--', 'LineWidth', 1);
-
-ax4 = subplot(2, 2, 4);
-plot(T,X(:,4), 'linewidth',2)
-ylabel("phi dot");
-xlabel("Time");
-title('phi dot vs Time')
-yline(0, 'r--', 'LineWidth', 1);
-
-function [dx] = IterativeODE(t, x, xf)   
+function [dx] = PDControllerODE(t, x, xf, Kp, Kd)
     q = [x(1);x(3); 0];
     q_dot = [x(2);x(4); 0];
     error = q - xf;
     error_dot = q_dot - [0;0;0];
-    Kp = 7;
-    Kd = 20;
-
     tau = (-Kp*error)-(Kd*error_dot);
 
     %% Dynamical Model

@@ -1,18 +1,6 @@
 clc
-clear a
-close a
-%% Get the desired position from user input
-load('M_N_C_variables.mat')
-Des_pose = zeros(3,1);
-Des_pose = input("Please input the desired position:\n");
-%% Get the kinematics & dynamical model of the robot
-%The symbols are just examples, it can be changed to fit the need of modeling
-syms q1 q2 q3
-[T,J] = kinematics(q1,q2,q3);
-% Get the desired joint positions
-Qi = InverseKinematics(Des_pose,J,T);
-% Calculate the dynamical model
-% [M,C,N] = DynamicalModel(T,J);
+clear all
+close all
 %% The ode set point simulation of the model
 %Set up the initial status [phia0, ka0, phia0_d, ka0_d, phib0, kb0, phib0_d, kb0_d, phic0, kc0, phic0_d, kc0_d]
 % Qi = IK3D(Des_x,Des_y,Des_z);
@@ -38,3 +26,45 @@ plot(T,X(:,5),'color','b');
 hold on
 plot(T,X(:,6),'color','g');
 legend('phid','kd','thetad')
+
+
+%% Dynamical Model 
+% x0 = [theta, theta_dot, phi, phi_dot]
+x0 = [pi/12, 0, pi/3, 0];
+xf = [2; pi/2;0];
+Kp = 7;
+Kd = 20;
+tf = 100;
+[TPD,XPD] = ode45(@(t,x) PDControllerODE(t, x, xf, Kp, Kd), [0 tf], x0);
+figure,
+ax1 = subplot(2, 2, 1);
+plot(TPD,XPD(:,1), 'linewidth',2)
+ylabel("theta");
+xlabel("Time");
+title('theta vs Time')
+hold on
+yline(xf(1), 'r--', 'LineWidth', 1);
+
+ax2 = subplot(2, 2, 2);
+plot(TPD,XPD(:,3), 'linewidth',2)
+ylabel("phi");
+xlabel("Time");
+title('phi vs Time')
+hold on
+yline(xf(2), 'r--', 'LineWidth', 1);
+
+
+ax3 = subplot(2, 2, 3);
+plot(TPD,XPD(:,2), 'linewidth',2)
+ylabel("theta dot");
+xlabel("Time");
+title('theta dot vs Time')
+hold on
+yline(0, 'r--', 'LineWidth', 1);
+
+ax4 = subplot(2, 2, 4);
+plot(TPD,XPD(:,4), 'linewidth',2)
+ylabel("phi dot");
+xlabel("Time");
+title('phi dot vs Time')
+yline(0, 'r--', 'LineWidth', 1);
