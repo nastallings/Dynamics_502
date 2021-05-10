@@ -6,13 +6,11 @@ close all
 % Des_pose = input("Please input the desired position:\n");
 %% The ode set point simulation of the model
 
-%Assume Qi = [3,1,2] = [phi,k,theta];
-T = forKin(3,1,2);
-Des_x = T(1,4);
-Des_y = T(2,4);
-Des_z = T(3,4);
+%Consider our desired position is x,y,z = [3,1,2]
+Des_x = 3;
+Des_y = 1;
+Des_z = 2;
 Qi = zeros(1,3);
-
 % Check wether the inverse kinematics feedbacks the correct results
 [Qi(1),Qi(2),Qi(3)] = IK3D(Des_x,Des_y,Des_z);
 
