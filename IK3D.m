@@ -1,4 +1,4 @@
-function [theta,phi,k] = IK3D(x, y, z)
+function [phi,k,theta] = IK3D(x, y, z)
 % section 2.2 says how to handle singularities but sam is tired
 % P  = (x,y,z) % desired point
 
