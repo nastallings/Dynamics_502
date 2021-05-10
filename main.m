@@ -22,20 +22,26 @@ tf = 0:0.01:20;
 %Running the ode functions
 [T,X] = ode45(@(t,x) odesetpoint(t,x,aphi,ak,atheta),tf,x0_setpoint);
 %% Plotting the joint trajectory results
-figure('Name','The trajectory of designed joint values');
+figure;
 plot(T,X(:,1),'color','r');
 hold on
 plot(T,X(:,2),'color','b');
 hold on
 plot(T,X(:,3),'color','g');
+xlabel("time") 
+ylabel("joint values") 
+title('The trajectory of designed joint values')
 legend('phi','k','theta')
-figure('Name','The velocity trajectory of designed joint values');
+figure;
 plot(T,X(:,4),'color','r');
 hold on
 plot(T,X(:,5),'color','b');
 hold on
 plot(T,X(:,6),'color','g');
+xlabel("time");
+ylabel("joint velocities")
 legend('phid','kd','thetad')
+title('The velocity trajectory of designed joint values')
 
 
 %% Dynamical Model 
